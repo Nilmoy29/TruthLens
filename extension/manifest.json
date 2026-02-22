@@ -1,0 +1,25 @@
+{
+  "manifest_version": 3,
+  "name": "TruthLens",
+  "version": "0.1.0",
+  "description": "Analyze credibility, bias, and media authenticity on any page.",
+  "action": {
+    "default_title": "TruthLens",
+    "default_popup": "popup.html"
+  },
+  "permissions": ["storage", "activeTab", "scripting", "contextMenus"],
+  "host_permissions": [
+    "http://localhost:*/*"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["content.js"],
+      "run_at": "document_idle"
+    }
+  ],
+  "options_page": "options.html"
+}

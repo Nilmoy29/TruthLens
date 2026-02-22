@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TruthLens Extension API Test</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            margin-bottom: 30px;
+        }
+        .test-section {
+            margin-bottom: 30px;
+            padding: 20px;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+        }
+        .test-button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            margin-right: 10px;
+            margin-bottom: 10px;
+        }
+        .test-button:hover {
+            background: #0056b3;
+        }
+        .test-button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        .result {
+            margin-top: 15px;
+            padding: 15px;
+            border-radius: 6px;
+            font-family: monospace;
+            font-size: 12px;
+            white-space: pre-wrap;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        .result.success {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+        .result.error {
+            background: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+        }
+        .result.info {
+            background: #d1ecf1;
+            border: 1px solid #bee5eb;
+            color: #0c5460;
+        }
+        .input-group {
+            margin-bottom: 15px;
+        }
+        .input-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 500;
+        }
+        .input-group textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-family: inherit;
+            resize: vertical;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔍 TruthLens Extension API Test</h1>
+        
+        <div class="test-section">
+            <h3>Fact Check API Test</h3>
+            <div class="input-group">
+                <label for="factCheckInput">Content to fact-check:</label>
+                <textarea id="factCheckInput" rows="3" placeholder="Enter text or URL to fact-check...">The sky is blue during the day.</textarea>
+            </div>
+            <button class="test-button" onclick="testFactCheck()">Test Fact Check</button>
+            <div id="factCheckResult" class="result" style="display: none;"></div>
+        </div>
+        
+        <div class="test-section">
+            <h3>Bias Analysis API Test</h3>
+            <div class="input-group">
+                <label for="biasAnalysisInput">Content to analyze for bias:</label>
+                <textarea id="biasAnalysisInput" rows="3" placeholder="Enter text or URL to analyze for bias...">This is a neutral statement about the weather.</textarea>
+            </div>
+            <button class="test-button" onclick="testBiasAnalysis()">Test Bias Analysis</button>
+            <div id="biasAnalysisResult" class="result" style="display: none;"></div>
+        </div>
+        
+        <div class="test-section">
+            <h3>Media Verification API Test</h3>
+            <div class="input-group">
+                <label for="mediaFileInput">Select image or video file:</label>
+                <input type="file" id="mediaFileInput" accept="image/*,video/*">
+            </div>
+            <button class="test-button" onclick="testMediaVerification()">Test Media Verification</button>
+            <div id="mediaVerificationResult" class="result" style="display: none;"></div>
+        </div>
+        
+        <div class="test-section">
+            <h3>Run All Tests</h3>
+            <button class="test-button" onclick="runAllTests()">Run All API Tests</button>
+            <div id="allTestsResult" class="result" style="display: none;"></div>
+        </div>
+    </div>
+
+    <script>
+        const baseUrl = 'http://localhost:3000';
+
+        function showResult(elementId, content, type = 'info') {
+            const element = document.getElementById(elementId);
+            element.textContent = content;
+            element.className = `result ${type}`;
+            element.style.display = 'block';
+        }
+
+        async function testFactCheck() {
+            const content = document.getElementById('factCheckInput').value.trim();
+            if (!content) {
+                showResult('factCheckResult', 'Please enter content to fact-check.', 'error');
+                return;
+            }
+
+            showResult('factCheckResult', 'Testing fact-check endpoint...', 'info');
+            
+            try {
+                const response = await fetch(`${baseUrl}/api/extension/fact-check`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ content })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    showResult('factCheckResult', `✅ Fact-check API working!\n\nResponse:\n${JSON.stringify(data, null, 2)}`, 'success');
+                } else {
+                    showResult('factCheckResult', `❌ Fact-check API failed:\n${data.error || 'Unknown error'}`, 'error');
+                }
+            } catch (error) {
+                showResult('factCheckResult', `❌ Network error:\n${error.message}`, 'error');
+            }
+        }
+
+        async function testBiasAnalysis() {
+            const content = document.getElementById('biasAnalysisInput').value.trim();
+            if (!content) {
+                showResult('biasAnalysisResult', 'Please enter content to analyze.', 'error');
+                return;
+            }
+
+            showResult('biasAnalysisResult', 'Testing bias analysis endpoint...', 'info');
+            
+            try {
+                const response = await fetch(`${baseUrl}/api/extension/bias-analysis`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ content })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    showResult('biasAnalysisResult', `✅ Bias analysis API working!\n\nResponse:\n${JSON.stringify(data, null, 2)}`, 'success');
+                } else {
+                    showResult('biasAnalysisResult', `❌ Bias analysis API failed:\n${data.error || 'Unknown error'}`, 'error');
+                }
+            } catch (error) {
+                showResult('biasAnalysisResult', `❌ Network error:\n${error.message}`, 'error');
+            }
+        }
+
+        async function testMediaVerification() {
+            const fileInput = document.getElementById('mediaFileInput');
+            const file = fileInput.files[0];
+            
+            if (!file) {
+                showResult('mediaVerificationResult', 'Please select a file to verify.', 'error');
+                return;
+            }
+
+            showResult('mediaVerificationResult', 'Testing media verification endpoint...', 'info');
+            
+            try {
+                const formData = new FormData();
+                formData.append('file', file);
+                
+                const response = await fetch(`${baseUrl}/api/extension/media-verify`, {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    showResult('mediaVerificationResult', `✅ Media verification API working!\n\nResponse:\n${JSON.stringify(data, null, 2)}`, 'success');
+                } else {
+                    showResult('mediaVerificationResult', `❌ Media verification API failed:\n${data.error || 'Unknown error'}`, 'error');
+                }
+            } catch (error) {
+                showResult('mediaVerificationResult', `❌ Network error:\n${error.message}`, 'error');
+            }
+        }
+
+        async function runAllTests() {
+            showResult('allTestsResult', 'Running all API tests...', 'info');
+            
+            let results = [];
+            
+            // Test fact-check
+            try {
+                const response = await fetch(`${baseUrl}/api/extension/fact-check`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ content: 'Test content for fact checking' })
+                });
+                results.push(`Fact Check: ${response.ok ? '✅ PASS' : '❌ FAIL'}`);
+            } catch (error) {
+                results.push(`Fact Check: ❌ ERROR - ${error.message}`);
+            }
+            
+            // Test bias analysis
+            try {
+                const response = await fetch(`${baseUrl}/api/extension/bias-analysis`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ content: 'Test content for bias analysis' })
+                });
+                results.push(`Bias Analysis: ${response.ok ? '✅ PASS' : '❌ FAIL'}`);
+            } catch (error) {
+                results.push(`Bias Analysis: ❌ ERROR - ${error.message}`);
+            }
+            
+            const allPassed = results.every(result => result.includes('✅'));
+            const resultType = allPassed ? 'success' : 'error';
+            
+            showResult('allTestsResult', `Test Results:\n\n${results.join('\n')}\n\n${allPassed ? 'All tests passed! 🎉' : 'Some tests failed. Check individual results above.'}`, resultType);
+        }
+    </script>
+</body>
+</html>
